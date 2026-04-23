@@ -1,0 +1,26 @@
+{
+  "name": "pc",
+  "version": "1.0.0",
+  "description": "> **AI 에이전트 팀 기반의 자율적 퀀트 전략 리서치 프레임워크**",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bucheoncityboy/oh-my-gemini.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bucheoncityboy/oh-my-gemini/issues"
+  },
+  "homepage": "https://github.com/bucheoncityboy/oh-my-gemini#readme",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}

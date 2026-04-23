@@ -1,2 +1,2 @@
 @echo off
-node script/init_deep.js %*
+npx tsx src/init_deep.ts %*
