@@ -14,7 +14,7 @@ This skill utilizes a segmented context architecture and a multi-agent delegatio
 | **1. Interview** | `[PHASE:INTERVIEW]` | `references/interview.md` | Requirements Lock & Validation Criteria |
 | **2. Plan** | `[PHASE:PLAN]` | `references/plan.md` | RALPLAN & CI/CD Strategy (via `codebase_investigator`) |
 | **3. Split** | `[PHASE:SPLIT]` | `references/split.md` | Atomic Missions (JSON with Sub-Agent mapping) |
-| **4. Exec** | `[PHASE:EXEC]` | `references/exec.md` | Parallel Sub-Agent Delegation & Hard-Gatekeeping |
+| **4. Exec** | `[PHASE:EXEC]` | `references/exec.md` & `references/review.md` | Parallel Delegation & Ruthless Peer Review |
 
 ## 🛠 Operational Instructions
 
@@ -39,8 +39,9 @@ This skill utilizes a segmented context architecture and a multi-agent delegatio
 - **Exit**: "Split Complete".
 
 #### `[PHASE:EXEC]` (Sisyphus Orchestrator Persona)
-- **Action**: Do NOT write code directly. You MUST use the `invoke_agent` tool to dispatch missions to sub-agents.
-- **Constraint**: You MUST inject the Hard-Gatekeeping rules (`lsp_check.js` and `gatekeeper.js`) into every sub-agent's prompt, forcing them to check logs and report "GATE OPEN".
+- **Action**: Do NOT write code directly. Use `invoke_agent` to dispatch missions.
+- **Ruthless Review Loop**: After every implementation, you MUST invoke a **Peer Review (Metis)** using `references/review.md`. Any deviation from the `RALPLAN` results in immediate rejection and re-execution.
+- **Constraint**: You MUST inject Hard-Gatekeeping rules (`lsp_check.js` and `gatekeeper.js`) into prompts.
 - **Exit**: "All Missions Accomplished & Verified".
 
 ## 📜 Global Standards
