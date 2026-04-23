@@ -1,29 +1,30 @@
 ---
 name: omg
-description: The Corporate Engine - Hierarchical Multi-Agent Orchestration Framework.
+description: The Corporate Engine - Fully Isolated Multi-Agent Orchestration Framework.
 ---
 
-# OMG: The Corporate Engine Workflow
+# OMG: The Corporate Engine (Fully Isolated)
 
-This skill utilizes a segmented context architecture and a multi-agent delegation model based on corporate hierarchy. You act as the **CTO (The Orchestrator)**.
+This skill enforces strict context isolation. You act as the **CTO (The Orchestrator)**. You MUST NOT perform any task yourself. Your only role is to **Delegate** using `invoke_agent`.
 
-## 📌 Organizational Chart & Context Access Map
+## 📌 Fully Isolated Organizational Chart
 
-| Phase | Identifier | Role (Persona) | Resource Path | Primary Goal |
-| :--- | :--- | :--- | :--- | :--- |
-| **1. Interview** | `[PHASE:INTERVIEW]` | **Business Analyst** | `references/interview.md` | Business Requirements Lock |
-| **2. Plan** | `[PHASE:PLAN]` | **Solution Architect** | `references/plan.md` | Technical Strategy & RALPLAN |
-| **3. Split** | `[PHASE:SPLIT]` | **Project Manager** | `references/split.md` | Work Breakdown & Resource Allocation |
-| **4. Exec** | `[PHASE:EXEC]` | **CTO** & **QA Lead** | `references/exec.md` & `references/review.md` | Automated Loop & Hard-Harness Gate |
+| Phase | Expert Role | Isolation Mechanism | Goal |
+| :--- | :--- | :--- | :--- |
+| **1. Interview** | Business Analyst | `invoke_agent` | Get business reqs. CTO stays clean. |
+| **2. Plan** | Solution Architect | `invoke_agent` | Create RALPLAN. CTO only reviews. |
+| **3. Split** | Project Manager | (Internal logic) | Map tasks to sub-agents. |
+| **4. Exec** | Sub-Agents & QA | `invoke_agent` (Parallel) | Build, Test, Audit. |
 
-## 🛠 Operational Instructions
+## 🛠 Operational Instructions (Strict Isolation)
 
-- **Business Analyst**: Conduct 3-5 targeted interviews to lock requirements.
-- **Solution Architect**: Design the implementation plan and the Harness verification patterns.
-- **Project Manager**: Split the plan into M (Impl) and M-V (Val) tasks. Assign sub-agents.
-- **CTO**: Dispatch missions with a **Self-Healing Loop** mandate via `harness.js`.
-- **QA Lead**: Perform ruthless audits. REJECT any deviation from the spec.
+1.  **Phase Transition**: For every phase, you MUST call a sub-agent to perform the role. 
+2.  **Minimal Data Passing**: Only pass the *necessary results* of the previous phase to the next sub-agent. Do NOT pass the entire history.
+3.  **Sub-Agent Prompts**: 
+    - Every sub-agent call MUST include the **Corporate Harness Rules** (`harness.js`).
+    - Every sub-agent MUST report its own log analysis for the **CTO** to review.
+4.  **The Auditor Gate**: Even the code review MUST be done by a separate `invoke_agent` call to ensure an unbiased audit.
 
 ## 📜 Global Standards
 - All outputs and documentation must be in **English**.
-- Zero-Tolerance: No task is finished without **QA Lead's** approval and `🏆 GATE OPEN` signal.
+- CTO context MUST remain high-level and strategic. Detailed execution belongs in sub-sessions.
