@@ -1,50 +1,58 @@
-# OMG: Sisyphus Engine & Multi-Agent Orchestration Framework
+# OMG: Sisyphus Engine & 다중 에이전트 오케스트레이션 프레임워크
 
-This framework is a high-integrity development lifecycle for Gemini CLI, inspired by the **Oh My OpenAgent (OmO)** architecture. It transforms a single agent into a **Strategic Orchestrator (Sisyphus)** that manages a team of independent sub-agents through strict runtime harnesses.
+이 프레임워크는 Gemini CLI를 위한 고신뢰성 개발 라이프사이클로, **Oh My OpenAgent (OmO)** 아키텍처에서 영감을 받아 제작되었습니다. 단일 에이전트를 **전략적 조율자(Sisyphus)**로 변모시켜, 엄격한 런타임 하네스(Harness)를 통해 독립적인 서브 에이전트 팀을 관리하게 합니다.
 
-## 🚀 Core Methodology: The Sisyphus Engine
+## 🚀 핵심 방법론: Sisyphus Engine
 
-Unlike standard linear workflows, OMG uses a **Delegation & Validation** model:
+OMG는 단순한 선형 워크플로우 대신 **위임 및 검증(Delegation & Validation)** 모델을 사용합니다:
 
-1.  **Prometheus (Interview)**: Clarifies intent and locks requirements and validation criteria.
-2.  **Senior Architect (Plan)**: Designs the technical strategy (RALPLAN) and defines success patterns for the harness.
-3.  **Operations Manager (Split)**: Deconstructs the plan into **Atomic Missions (M)** paired with **Validation Missions (M-V)**. Missions are assigned to specific sub-agents and flagged for **Parallel Execution**.
-4.  **Sisyphus (Orchestration)**: Dispatches tasks via `invoke_agent`. It injects "Hard Gatekeeping" rules into sub-agent prompts, forcing them to use the system harness.
+1.  **Prometheus (Interview)**: 사용자의 의도를 명확히 하고, 요구사항과 검증 기준을 확정합니다.
+2.  **Senior Architect (Plan)**: 기술 전략(RALPLAN)을 설계하고 하네스를 위한 성공 패턴을 정의합니다.
+3.  **Operations Manager (Split)**: 계획을 **원자적 미션(M)**과 **검증 미션(M-V)**으로 분해합니다. 각 미션은 특정 서브 에이전트에게 할당되며 병렬 실행 여부가 결정됩니다.
+4.  **Sisyphus (Orchestration)**: `invoke_agent`를 통해 작업을 분배합니다. 서브 에이전트의 프롬프트에 "Hard Gatekeeping" 규칙을 주입하여 반드시 시스템 하네스를 사용하도록 강제합니다.
 
-## 🛡️ The Harness System (Hard Gatekeeping)
+## 🛡️ 하네스 시스템 (Hard Gatekeeping)
 
-We utilize a **Node.js-based Runtime Harness** to ensure zero-derailment and absolute code quality.
+코드 품질을 보장하고 에이전트의 탈선을 막기 위해 **Node.js 기반의 런타임 하네스**를 사용합니다.
 
-### 1. `script/lsp_check.js` (The Syntax Gate)
-- **Automatic Diagnostics**: Detects file types (.py, .js, etc.) and runs compilation checks (`python -m py_compile`, `node --check`).
-- **Hard Block**: If syntax is invalid, the mission cannot be completed.
+### 1. `script/lsp_check.js` (문법 검문소)
+- **자동 진단**: 파일 확장자(.py, .js 등)를 감지하고 `python -m py_compile` 또는 `node --check`를 통해 컴파일 체크를 수행합니다.
+- **하드 블록**: 문법이 올바르지 않으면 미션을 완료할 수 없습니다.
 
-### 2. `script/gatekeeper.js` (The Functional Gate / "The Eyes")
-- **Pattern Matching**: Executes commands and searches logs for specific "Success Patterns" defined during the Plan phase.
-- **Log Analysis**: Moves beyond exit codes. It analyzes the actual text output to confirm the "Desired Outcome."
-- **Gate Signal**: Only outputs `🏆 GATE OPEN` if both the exit code is 0 and all expected patterns are found.
+### 2. `script/gatekeeper.js` (기능 검문소 / "The Eyes")
+- **패턴 매칭**: 명령어를 실행하고 로그에서 계획 단계에서 정의한 "성공 패턴"을 검색합니다.
+- **로그 분석**: 종료 코드뿐만 아니라 실제 출력 텍스트를 분석하여 의도한 결과가 나왔는지 확인합니다.
+- **Gate Signal**: 종료 코드가 0이고 모든 패턴이 발견되어야만 `🏆 GATE OPEN` 신호를 보냅니다.
 
-## 📂 System Structure
+## 📦 설치 및 이식 방법 (Quick Start)
 
-```text
-.gemini/skills/omg/
-├── SKILL.md                # The Multi-Agent Orchestration Router
-└── references/
-    ├── interview.md        # [PHASE:INTERVIEW] Requirements & Validation Lock
-    ├── plan.md             # [PHASE:PLAN] RALPLAN & Harness Strategy
-    ├── split.md            # [PHASE:SPLIT] Multi-Agent Task Breakdown (JSON)
-    └── exec.md             # [PHASE:EXEC] Sisyphus Orchestrator (Delegation)
-script/
-├── lsp_check.js            # Node.js-based Syntax Harness
-└── gatekeeper.js           # Node.js-based Log Analysis Harness
+이 저장소를 다운로드한 후, 다음 단계에 따라 자신의 환경에 이식하세요.
+
+### 1. 파일 복사 경로
+저장소의 파일들을 아래 경로에 맞춰 복사합니다.
+
+*   **스킬 파일**: `SKILL.md`와 `references/` 폴더를 아래 경로에 넣습니다.
+    *   경로: `%USERPROFILE%\.gemini\skills\omg\`
+*   **하네스 스크립트**: `script/` 폴더를 프로젝트 루트 디렉토리에 넣습니다.
+    *   경로: `(당신의 프로젝트 루트)\script\`
+
+### 2. 스킬 등록 및 활성화
+Gemini CLI에서 이 스킬을 인식하게 하려면 세션 시작 시 다음 명령어를 사용하거나 `GEMINI.md`에 추가하세요.
+
+```bash
+# 세션 내에서 활성화
+/activate_skill omg
 ```
 
-## 🛠 Operational Standards
+또는 에이전트에게 직접 지시하세요:
+> "omg 스킬을 분석하고 워크플로우를 시작해줘."
 
-- **English First**: All internal documentation, prompts, and harness logs are standardized in English.
-- **Context Indexing**: The agent only reads the specific reference file for its current phase to minimize token usage.
-- **Parallelism**: Independent missions are executed concurrently to maximize throughput.
-- **Zero-Tolerance**: No task is marked "Accomplished" without explicit harness evidence (`✅ SUCCESS` or `🏆 GATE OPEN`).
+## 🛠 운영 표준
+
+- **English First**: 내부 문서, 프롬프트 주입 및 하네스 로그는 전문성 유지를 위해 영어로 표준화되어 있습니다.
+- **Context Indexing**: 에이전트는 토큰 절약을 위해 현재 단계에 필요한 레퍼런스 파일만 읽습니다.
+- **Parallelism**: 독립적인 미션은 동시에 실행되어 작업 속도를 극대화합니다.
+- **Zero-Tolerance**: 하네스의 명확한 증거(`✅ SUCCESS` 또는 `🏆 GATE OPEN`) 없이는 어떤 작업도 완료된 것으로 간주하지 않습니다.
 
 ---
-*Developed for Gemini CLI with the spirit of Oh My OpenAgent.*
+*Gemini CLI를 위해 Oh My OpenAgent의 정신으로 제작되었습니다.*
