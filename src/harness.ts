@@ -2,10 +2,11 @@ import { execSync, spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AnchorEngine } from './lib/anchor';
+import { StateManager } from './lib/state_manager';
 
 /**
- * OMG Corporate Engine - Unified Hard Harness (v3.1-Deterministic)
- * Implements Multi-Layer Validation and Hash-Anchored Integrity.
+ * OMG Corporate Engine - Unified Hard Harness (v3.2-Persistent)
+ * Implements Multi-Layer Validation, Hash-Anchored Integrity, and State Reporting.
  */
 
 interface HarnessConfig {
@@ -13,7 +14,7 @@ interface HarnessConfig {
     execCmd: string;
     expectPatterns: string[];
     timeout: number;
-    verifyAnchor?: string; // Optional path to .anchor.json
+    taskId?: string; // Optional Task ID to report back to StateManager
 }
 
 interface AuditReport {
@@ -34,7 +35,8 @@ const config: HarnessConfig = {
     targetFile: args[0],
     execCmd: args[1].trim(),
     expectPatterns: args[2] ? args[2].split(',') : [],
-    timeout: args[3] ? parseInt(args[3]) : 30000 // Default 30s
+    timeout: args[3] ? parseInt(args[3]) : 30000, // Default 30s
+    taskId: args[4] // Optional Task ID
 };
 
 const AUDIT_LOG_DIR = path.join(process.cwd(), '.gemini/harness/logs');
@@ -44,9 +46,14 @@ if (!fs.existsSync(AUDIT_LOG_DIR)) {
 
 console.log(`\n[HARNESS-v3] 🛡️  Starting Deterministic Corporate Audit Gate...`);
 
-function logAudit(report: AuditReport) {
+function logAudit(report: AuditReport, cfg: HarnessConfig) {
     const logFile = path.join(AUDIT_LOG_DIR, `audit_${Date.now()}.json`);
     fs.writeFileSync(logFile, JSON.stringify(report, null, 2));
+
+    if (cfg.taskId) {
+        StateManager.updateTask(cfg.taskId, report.success ? 'COMPLETED' : 'FAILED', report);
+    }
+
     if (!report.success) {
         console.error(`\n[HARNESS-v3] ❌ PHASE FAILED: ${report.phase}`);
         console.error(`[HARNESS-v3] Reason: ${report.reason}`);
@@ -146,7 +153,7 @@ function runAudit(cfg: HarnessConfig): AuditReport {
 }
 
 const report = runAudit(config);
-logAudit(report);
+logAudit(report, config);
 
 if (report.success) {
     console.log(`\n[HARNESS-v3] 🏆 GATE OPEN: Code is compliant and verified.`);
