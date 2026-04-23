@@ -3,47 +3,41 @@ const path = require('path');
 const os = require('os');
 
 /**
- * OMG Sisyphus Engine - One-Click Installer
+ * OMG Corporate Engine - One-Click Installer
  */
 
 const HOME = os.homedir();
 const TARGET_SKILL_DIR = path.join(HOME, '.gemini', 'skills', 'omg');
 const SOURCE_DIR = __dirname;
 
-console.log(`\n[INSTALLER] 🛠  OMG Sisyphus Engine 설치를 시작합니다...`);
+console.log(`\n[INSTALLER] 🏢 Corporate Engine 설치 및 단축 명령어 설정을 시작합니다...`);
 
 function copyRecursive(src, dest) {
-    const exists = fs.existsSync(src);
-    const stats = exists && fs.statSync(src);
-    const isDirectory = stats && stats.isDirectory();
-
-    if (isDirectory) {
+    if (fs.statSync(src).isDirectory()) {
         if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-        fs.readdirSync(src).forEach((child) => {
-            copyRecursive(path.join(src, child), path.join(dest, child));
-        });
+        fs.readdirSync(src).forEach(child => copyRecursive(path.join(src, child), path.join(dest, child)));
     } else {
         fs.copyFileSync(src, dest);
     }
 }
 
 try {
-    // 1. 스킬 디렉토리 생성
-    if (!fs.existsSync(TARGET_SKILL_DIR)) {
-        console.log(`[INSTALLER] 📂 디렉토리 생성 중: ${TARGET_SKILL_DIR}`);
-        fs.mkdirSync(TARGET_SKILL_DIR, { recursive: true });
-    }
-
-    // 2. 핵심 파일 복사 (SKILL.md, references/)
-    console.log(`[INSTALLER] 📑 스킬 파일 복사 중...`);
+    // 1. 스킬 디렉토리 복사
+    if (!fs.existsSync(TARGET_SKILL_DIR)) fs.mkdirSync(TARGET_SKILL_DIR, { recursive: true });
     fs.copyFileSync(path.join(SOURCE_DIR, 'SKILL.md'), path.join(TARGET_SKILL_DIR, 'SKILL.md'));
     copyRecursive(path.join(SOURCE_DIR, 'references'), path.join(TARGET_SKILL_DIR, 'references'));
 
-    console.log(`\n[INSTALLER] ✅ 설치 완료!`);
+    // 2. 단축 명령어 배치 (Windows 전용 .bat)
+    if (process.platform === 'win32') {
+        fs.writeFileSync(path.join(SOURCE_DIR, 'init_deep.bat'), '@echo off\nnode script/init_deep.js %*');
+        fs.writeFileSync(path.join(SOURCE_DIR, 'harness.bat'), '@echo off\nnode script/harness.js %*');
+        console.log(`[INSTALLER] ⚡ 단축 명령어 생성 완료: init_deep, harness`);
+    }
+
+    console.log(`\n[INSTALLER] ✅ 모든 설정이 완료되었습니다!`);
     console.log(`--------------------------------------------------`);
-    console.log(`1. 스킬 위치: ${TARGET_SKILL_DIR}`);
-    console.log(`2. 하네스 위치: ${path.join(SOURCE_DIR, 'script')}`);
-    console.log(`\n이제 Gemini CLI에서 다음 명령어로 시작하세요:`);
+    console.log(`이제 터미널에서 다음 명령어를 바로 사용하세요:`);
+    console.log(`> init_deep 2`);
     console.log(`> /activate_skill omg`);
     console.log(`--------------------------------------------------\n`);
 
