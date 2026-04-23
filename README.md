@@ -34,7 +34,7 @@ OMG의 하네스는 제어 공학의 피드백 루프를 소프트웨어 품질 
 ### 1. Multi-Layer Validation Gate
 모든 코드 변경사항은 반영 전 다음의 3단계 게이트를 반드시 통과해야 합니다:
 - **L0: Static Analysis**: `ruff` (Python) 및 `tsc` (TypeScript)를 통한 엄격한 문법 및 타입 체크.
-- **L1: Structural Integrity**: **Hash-Anchored Edit** 시스템을 통해 기존 파일의 무결성과 에이전트의 수정 위치를 해시 단위로 대조 검증.
+- **L1: Structural Integrity**: **Hash-Anchored Edit** 시스템을 통해 기존 파일의 무결성을 검증합니다. 특히 대규모 파일의 경우 전체 해시를 대조하는 대신 **핵심 샘플링(Initial Line Sampling)** 기법을 사용하여 에이전트가 수정하려는 컨텍스트가 실제 파일과 일치하는지 초고속으로 판정합니다.
 - **L2: Functional Audit**: 실제 실행 환경에서 로직의 정상 작동 및 기대 출력 패턴 매칭 검증.
 
 ### 2. Hash-Anchored Edit System
