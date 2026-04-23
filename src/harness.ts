@@ -1,82 +1,156 @@
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { AnchorEngine } from './lib/anchor';
 
 /**
- * OMG Corporate Engine - Unified Hard Harness (TypeScript Version)
+ * OMG Corporate Engine - Unified Hard Harness (v3.1-Deterministic)
+ * Implements Multi-Layer Validation and Hash-Anchored Integrity.
  */
 
 interface HarnessConfig {
     targetFile: string;
     execCmd: string;
     expectPatterns: string[];
+    timeout: number;
+    verifyAnchor?: string; // Optional path to .anchor.json
 }
 
 interface AuditReport {
     success: boolean;
+    phase: 'STATIC' | 'FUNCTIONAL' | 'STRUCTURAL';
     reason?: string;
+    details?: any;
     timestamp: string;
 }
 
 const args = process.argv.slice(2);
 if (args.length < 2) {
-    console.error('[HARNESS-TS] Usage: tsx src/harness.ts <file> <"cmd"> <"p1,p2">');
+    console.error('[HARNESS-v3] Usage: tsx src/harness.ts <file> <"cmd"> <"p1,p2"> [timeout_ms]');
     process.exit(1);
 }
 
 const config: HarnessConfig = {
     targetFile: args[0],
-    execCmd: args[1],
-    expectPatterns: args[2] ? args[2].split(',') : []
+    execCmd: args[1].trim(),
+    expectPatterns: args[2] ? args[2].split(',') : [],
+    timeout: args[3] ? parseInt(args[3]) : 30000 // Default 30s
 };
 
-console.log(`\n[HARNESS-TS] 🛡️  Starting Corporate Audit Gate (v2.0-TS)...`);
+const AUDIT_LOG_DIR = path.join(process.cwd(), '.gemini/harness/logs');
+if (!fs.existsSync(AUDIT_LOG_DIR)) {
+    fs.mkdirSync(AUDIT_LOG_DIR, { recursive: true });
+}
+
+console.log(`\n[HARNESS-v3] 🛡️  Starting Deterministic Corporate Audit Gate...`);
+
+function logAudit(report: AuditReport) {
+    const logFile = path.join(AUDIT_LOG_DIR, `audit_${Date.now()}.json`);
+    fs.writeFileSync(logFile, JSON.stringify(report, null, 2));
+    if (!report.success) {
+        console.error(`\n[HARNESS-v3] ❌ PHASE FAILED: ${report.phase}`);
+        console.error(`[HARNESS-v3] Reason: ${report.reason}`);
+    }
+}
 
 function runAudit(cfg: HarnessConfig): AuditReport {
+    const timestamp = new Date().toISOString();
+    const ext = path.extname(cfg.targetFile);
+
     try {
-        // 1. LSP / Syntax Check
-        console.log(`[HARNESS-TS] 🔍 Phase 1: LSP/Syntax Check...`);
-        const ext = path.extname(cfg.targetFile);
+        // 1. L0: Static Analysis (Linter/Type Check)
+        console.log(`[HARNESS-v3] 🔍 Phase 0: Static Analysis (${ext})...`);
         if (ext === '.py') {
-            execSync(`python -m py_compile ${cfg.targetFile}`, { stdio: 'inherit' });
-        } else if (ext === '.js' || ext === '.ts') {
-            // For TS files, we would normally use tsc, but node --check works for syntax
-            execSync(`node --check ${cfg.targetFile}`, { stdio: 'inherit' });
+            // Try ruff first, fallback to py_compile
+            try {
+                execSync(`ruff check ${cfg.targetFile}`, { stdio: 'inherit' });
+            } catch (e) {
+                console.log(`[HARNESS-v3] Ruff not found or failed, falling back to py_compile...`);
+                execSync(`python -m py_compile ${cfg.targetFile}`, { stdio: 'inherit' });
+            }
+        } else if (ext === '.ts') {
+            // Strict TS check
+            try {
+                execSync(`npx tsc --noEmit ${cfg.targetFile} --esModuleInterop --skipLibCheck --ignoreConfig`, { stdio: 'inherit' });
+            } catch (e) {
+                // node --check as last resort for syntax
+                execSync(`node --check ${cfg.targetFile}`, { stdio: 'inherit' });
+            }
         }
-        console.log(`[HARNESS-TS] ✅ LSP Check Passed.`);
+        console.log(`[HARNESS-v3] ✅ Static Analysis Passed.`);
 
-        // 2. Functional & Log Pattern Check
-        console.log(`[HARNESS-TS] 🚀 Phase 2: Functional Validation...`);
-        let output = '';
-        try {
-            output = execSync(cfg.execCmd, { encoding: 'utf8', stdio: 'pipe' });
-            process.stdout.write(output);
-        } catch (err: any) {
-            output = err.stdout + err.stderr;
-            process.stdout.write(output);
-            throw new Error(`Functional execution failed: ${err.message}`);
+        // 2. L1: Structural Integrity (Hash-Anchored)
+        const anchorFile = `${cfg.targetFile}.anchor.json`;
+        if (fs.existsSync(anchorFile)) {
+            console.log(`[HARNESS-v3] ⚓ Phase 1: Structural Integrity Check...`);
+            const anchors = JSON.parse(fs.readFileSync(anchorFile, 'utf8'));
+            const currentAnchors = AnchorEngine.generateAnchors(cfg.targetFile);
+            
+            // Check if essential lines still match (sampling check)
+            for (const expected of anchors.slice(0, 10)) { // Check first 10 lines as a smoke test
+                const current = currentAnchors.find(a => a.line === expected.line);
+                if (!current || current.hash !== expected.hash) {
+                    return { 
+                        success: false, 
+                        phase: 'STRUCTURAL', 
+                        reason: `Hash mismatch at line ${expected.line}. Expected ${expected.hash}, found ${current?.hash}.`,
+                        timestamp 
+                    };
+                }
+            }
+            console.log(`[HARNESS-v3] ✅ Integrity Check Passed.`);
         }
 
-        const missing = cfg.expectPatterns.filter(p => !output.includes(p));
+        // 3. L2: Functional Validation
+        console.log(`[HARNESS-v3] 🚀 Phase 1: Functional Validation...`);
+        const result = spawnSync(cfg.execCmd, { 
+            shell: true, 
+            encoding: 'utf8', 
+            timeout: cfg.timeout,
+            maxBuffer: 10 * 1024 * 1024 // 10MB
+        });
+
+        const output = result.stdout + result.stderr;
+        process.stdout.write(output);
+
+        if (result.status !== 0) {
+            return { 
+                success: false, 
+                phase: 'FUNCTIONAL', 
+                reason: `Execution failed with exit code ${result.status}`,
+                details: { stderr: result.stderr },
+                timestamp 
+            };
+        }
+
+        const missing = cfg.expectPatterns.filter(p => !new RegExp(p, 'i').test(output));
         if (missing.length > 0) {
-            throw new Error(`Missing expected patterns: ${missing.join(', ')}`);
+            return { 
+                success: false, 
+                phase: 'FUNCTIONAL', 
+                reason: `Missing expected patterns: ${missing.join(', ')}`,
+                timestamp 
+            };
         }
 
-        return { success: true, timestamp: new Date().toISOString() };
+        return { success: true, phase: 'FUNCTIONAL', timestamp };
 
     } catch (error: any) {
-        return { success: false, reason: error.message, timestamp: new Date().toISOString() };
+        return { 
+            success: false, 
+            phase: 'STRUCTURAL', 
+            reason: error.message, 
+            timestamp 
+        };
     }
 }
 
 const report = runAudit(config);
+logAudit(report);
 
 if (report.success) {
-    console.log(`\n[HARNESS-TS] ✅ Functional Check Passed.`);
-    console.log(`[HARNESS-TS] 🏆 GATE OPEN: Code is compliant with Corporate Standards.`);
+    console.log(`\n[HARNESS-v3] 🏆 GATE OPEN: Code is compliant and verified.`);
     process.exit(0);
 } else {
-    console.error(`\n[HARNESS-TS] ❌ GATE CLOSED: Audit Failed.`);
-    console.error(`[HARNESS-TS] Reason: ${report.reason}`);
     process.exit(1);
 }

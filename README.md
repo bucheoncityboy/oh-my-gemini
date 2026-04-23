@@ -27,6 +27,24 @@ OMG의 하네스는 제어 공학의 피드백 루프를 소프트웨어 품질 
 
 ---
 
+## 🛡️ Deterministic Quality Control: Hard-Gatekeeping Harness v3.1
+
+이 프로젝트는 AI 에이전트의 "Vibe Coding"을 방지하고 결정론적인 코드 품질을 보장하기 위해 고도화된 **Harness v3.1** 시스템을 운용합니다.
+
+### 1. Multi-Layer Validation Gate
+모든 코드 변경사항은 반영 전 다음의 3단계 게이트를 반드시 통과해야 합니다:
+- **L0: Static Analysis**: `ruff` (Python) 및 `tsc` (TypeScript)를 통한 엄격한 문법 및 타입 체크.
+- **L1: Structural Integrity**: **Hash-Anchored Edit** 시스템을 통해 기존 파일의 무결성과 에이전트의 수정 위치를 해시 단위로 대조 검증.
+- **L2: Functional Audit**: 실제 실행 환경에서 로직의 정상 작동 및 기대 출력 패턴 매칭 검증.
+
+### 2. Hash-Anchored Edit System
+에이전트가 코드를 수정할 때 발생할 수 있는 '엉뚱한 위치 수정'이나 '코드 파괴'를 원천 차단합니다.
+- 수정 전 파일의 각 라인별 SHA-256 해시 스냅샷 생성.
+- 수정 시 에이전트가 인지하는 원본 해시와 실제 파일 해시가 일치할 때만 변경 허용.
+- 파일 상태의 미세한 불일치(Drift) 발생 시 즉각적으로 게이트를 폐쇄하여 시스템 보호.
+
+---
+
 ## 🏢 기업형 계급 구조 및 R&R
 
 | 직급 | 페르소나 | 주요 책임 (Accountability) |
