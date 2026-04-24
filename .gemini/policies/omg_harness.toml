@@ -1,0 +1,10 @@
+[[rule]]
+toolName = ["write_file", "replace", "run_shell_command"]
+decision = "deny"
+priority = 10
+
+[[rule]]
+toolName = ["write_file", "replace", "run_shell_command"]
+subagent = "omg-contractor"
+decision = "allow"
+priority = 20
